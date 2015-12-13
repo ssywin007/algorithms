@@ -1,0 +1,127 @@
+#Homework for Algorithm Design 1, week 6,
+#solving 2-sum problems via hash map
+
+def readin():
+    data = open('G:\\UCHI\Algorithm design 1\week6\Q1.txt', 'r')
+    datalist = list(data)
+    input_array = []
+    for i in datalist:
+        input_array.append(int(i))
+    return(input_array)
+
+#data = 10000 * code + (positive) key, code is the address
+def hash_func(i):
+    code = i // 10000
+    key = i % 10000
+    return (code,key)
+
+def hash_initialize(input_array):
+    n_nega = min(input_array) // 10000
+    n_posi = max(input_array) // 10000
+    hashtable_nega = [[] for i in range(-1 * n_nega + 1)]
+    hashtable_posi = [[] for i in range(n_posi + 1)]
+    for i in input_array:
+        (code, key) = hash_func(i)
+        if code < 0:
+            if key in hashtable_nega[-1 * code]:
+                continue
+            else:
+                hashtable_nega[-1 * code].append(key)
+        else:
+            if key in hashtable_posi[code]:
+                continue
+            else:
+                hashtable_posi[code].append(key)
+    return (hashtable_nega, hashtable_posi)
+
+def sum_2list(l1, l2):
+    s = [i + j for i in l1 for j in l2]
+    return (s)
+
+def bigger_than_10000(l):
+    b = [i - 20000 for i in l if i >= 10000]
+    return (b)
+
+def smaller_than_10000(l):
+    b = [i for i in l if i <= 10000]
+    return (b)
+
+def delete(target, t):
+    for i in t:
+        target[i + 10000] = 1
+    return (target)
+
+def self_sum(l):
+    s = [i + j for i in l for j in l if i != j]
+    s = list(set(s))
+    return (s)
+
+def sum_search(hashtable_nega, hashtable_posi):
+    target = [0 for i in range(20001)]
+    if len(hashtable_nega) > 1 and hashtable_nega[1] is not []:
+        temp = self_sum(hashtable_nega[1])
+        tempt = bigger_than_10000(temp)
+        #print(str(tempt))
+        target = delete(target, tempt)
+        #print('sum target = ' + str(sum(target)))
+        if len(hashtable_posi) > 1 and hashtable_posi[1] is not []:
+            temp = sum_2list(hashtable_nega[1], hashtable_posi[1])
+            tempt = smaller_than_10000(temp)
+            #print(str(tempt))
+            target = delete(target, tempt)
+            #print('sum target = ' + str(sum(target)))
+        if hashtable_posi[0] is not []:
+            temp = sum_2list(hashtable_nega[1], hashtable_posi[0])
+            tempt = [i - 10000 for i in temp]
+            #print(str(tempt))
+            target = delete(target, tempt)
+            #print('sum target = ' + str(sum(target)))
+    if hashtable_posi[0] is not []:
+        temp = self_sum(hashtable_posi[0])
+        tempt = smaller_than_10000(temp)
+        #print(str(tempt))
+        target = delete(target, tempt)
+        #print('sum target = ' + str(sum(target)))
+        
+    mindim = min(len(hashtable_nega), len(hashtable_posi))
+    if 2 < mindim:
+        for i in range(2, mindim):
+            if hashtable_nega[i] is []:
+                continue
+            if hashtable_posi[i - 2] is not []:
+                temp = sum_2list(hashtable_nega[i], hashtable_posi[i - 2])
+                tempt = bigger_than_10000(temp)
+                target = delete(target, tempt)
+            if hashtable_posi[i - 1] is not []:
+                temp = sum_2list(hashtable_nega[i], hashtable_posi[i - 1])
+                tempt = [i - 10000 for i in temp]
+                target = delete(target, tempt)
+            if hashtable_posi[i] is not []:
+                temp = sum_2list(hashtable_nega[i], hashtable_posi[i])
+                tempt = smaller_than_10000(temp)
+                target = delete(target, tempt)
+            
+    if len(hashtable_nega) > len(hashtable_posi):
+        if hashtable_nega[mindim] is not []:
+            if hashtable_posi[mindim - 2] is not []:
+                temp = sum_2list(hashtable_nega[mindim], hashtable_posi[mindim - 2])
+                tempt = bigger_than_10000(temp)
+                target = delete(target, tempt)
+            if hashtable_posi[mindim - 1] is not []:
+                temp = sum_2list(hashtable_nega[mindim], hashtable_posi[mindim - 1])
+                tempt = [i - 10000 for i in temp]
+                target = delete(target, tempt)
+    if len(hashtable_nega) > len(hashtable_nega) + 1:
+        if hashtable_nega[mindim + 1] is not []:
+            if hashtable_posi[mindim - 1] is not []:
+                temp = sum_2list(hashtable_nega[mindim + 1], hashtable_posi[mindim - 1])
+                tempt = bigger_than_10000(temp)
+                target = delete(target, tempt)
+    return (target)            
+
+input_array = readin()
+s = len(input_array)
+(hashtable_nega, hashtable_posi)  = hash_initialize(input_array)
+target = sum_search(hashtable_nega, hashtable_posi)
+
+    
