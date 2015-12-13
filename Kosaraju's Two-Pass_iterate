@@ -1,0 +1,98 @@
+#Homework for Algorithm Design 1, week 4,
+#using Kosaraju's Two-Pass Algorithm to compute connected components of directed graph
+
+import random
+import sys
+import collections
+import gc
+
+sys.setrecursionlimit(1000000)
+
+global n
+n = 875714
+
+def readin():
+    global n
+    data = open('G:\\UCHI\Algorithm design 1\week4\SCC.txt', 'r')
+    datalist = list(data)
+    adlist = [[] for i in range(n)]
+    for i in datalist:
+        temp = i.split()
+        newstart = int(temp.pop(0))
+        newend = int(temp.pop(0))
+        adlist[newstart - 1].append(newend)
+    return(adlist)
+
+def readinrev():
+    global n
+    data = open('G:\\UCHI\Algorithm design 1\week4\SCC.txt', 'r')
+    datalist = list(data)
+    adlist = [[] for i in range(n)]
+    for i in datalist:
+        temp = i.split()
+        newstart = int(temp.pop())
+        newend = int(temp.pop())
+        adlist[newstart - 1].append(newend)
+    return(adlist)
+
+def DFS(adlistd, seq):
+    global n
+    T = 0
+    S = 0
+    explored = [0 for i in range(n)]
+    ft = [0 for i in range(n)]
+    leader = [0 for i in range(n)]
+    for i in seq:
+        S = i + 1
+        if explored[i] == 0:
+            DFSstack = [i + 1]
+            length = 1
+            stackaddress = []
+            stackelement = []
+            while DFSstack:
+                #print(str(DFSstack))
+                #print(str(length))
+                #print(str(stackelement))
+                #print(str(stackaddress))
+                #print(str(ft))
+                #print(str(explored) + '\n')
+                temp = DFSstack.pop() - 1                      #temp records position
+                if explored[temp] == 1:
+                    length -= 1
+                    while length == stackaddress[-1]:
+                        length -= 1
+                        stackaddress.pop()
+                        T += 1
+                        ft[n - T] = stackelement.pop() - 1
+                        if stackaddress == []:
+                            break
+                else:
+                    leader[temp] = S
+                    explored[temp] = 1
+                    stackaddress.append(length)
+                    stackelement.append(temp + 1)
+                    length += len(adlistd[temp])
+                    DFSstack.extend(adlistd[temp])
+                    if length == stackaddress[-1]:
+                        length -= 1
+                        stackaddress.pop()
+                        T += 1
+                        ft[n - T] = stackelement.pop() - 1
+            while stackelement:
+                T += 1
+                ft[n - T] = stackelement.pop() - 1
+    return(ft, leader)
+            
+adlistrev = readinrev()
+revseq = [n - 1 - i for i in range(n)]                # the sequence of pass
+(finishtime, leader) = DFS(adlistrev, revseq)
+adlist = readin()
+(finishtime, leader) = DFS(adlist, finishtime)
+countscc = collections.Counter(leader)
+cscc = dict.values(countscc)
+cscc = list(cscc)
+cscc.sort()
+cscc.reverse()
+print(str(cscc[0:5]))
+
+
