@@ -1,0 +1,76 @@
+#Homework for Algorithm Design 1, week 4,
+#using Kosaraju's Two-Pass Algorithm to compute connected components of directed graph
+
+import random
+import sys
+import collections
+import gc
+
+sys.setrecursionlimit(1000000)
+
+global T 
+global S
+global n
+n = 875714
+
+def readin():
+    global n
+    data = open('G:\\UCHI\Algorithm design 1\week4\SCC.txt', 'r')
+    datalist = list(data)
+    adlist = [[] for i in range(n)]
+    for i in datalist:
+        temp = i.split()
+        newstart = int(temp.pop(0))
+        newend = int(temp.pop(0))
+        adlist[newstart - 1].append(newend)
+    return(adlist)
+
+def readinrev():
+    global n
+    data = open('G:\\UCHI\Algorithm design 1\week4\SCC.txt', 'r')
+    datalist = list(data)
+    adlist = [[] for i in range(n)]
+    for i in datalist:
+        temp = i.split()
+        newstart = int(temp.pop())
+        newend = int(temp.pop())
+        adlist[newstart - 1].append(newend)
+    return(adlist)
+
+def DFS(adlistdfs, ft, explored, leader, pos):
+    global S
+    global T
+    global n
+    explored[pos] = 1
+    leader[pos] = S
+    for j in adlistdfs[pos]:
+        if explored[j - 1] == 0:
+            (ft, explored, leader) = DFS(adlistdfs, ft, explored, leader, j - 1)
+    T += 1
+    ft[n - T] = pos
+    return(ft, explored, leader)
+
+def DFSLoop(adlistd, seq):
+    global T
+    global S
+    global n
+    T = 0
+    S = 0
+    explored = [0 for i in range(n)]
+    ft = [0 for i in range(n)]
+    leader = [0 for i in range(n)]
+    for i in seq:
+        if explored[i] == 0:
+            print(str(i))
+            S = i + 1
+            (ft, explored, leader) = DFS(adlistd, ft, explored, leader, i)
+    return(ft, leader)
+
+
+adlistrev = readinrev()
+revseq = [i for i in range(n)]                # the sequence of pass
+(finishtime, leader) = DFSLoop(adlistrev, revseq)
+#(nodes, adlist) = readin()
+#(finishtime, leader) = DFSLoop(nodes, adlist, finishtime)
+#countscc = collections.Counter(leader)
+#print(str(countscc))
