@@ -1,0 +1,129 @@
+#Homework for Algorithm Design 1, week 6,
+#median maintaince problem via two heaps
+
+def readin():
+    data = open('G:\\UCHI\Algorithm design 1\week6\Q2.txt', 'r')
+    datalist = list(data)
+    input_array = []
+    for i in datalist:
+        input_array.append(int(i))
+    return(input_array)
+
+def swap(l, p1, p2):
+    temp = l[p1]
+    l[p1] = l[p2]
+    l[p2] = temp
+    return (l)
+
+#add a new element into the heap, t = 0 means the heap keeps min value, t = 1 means the heap keeps max value
+def heap_push(h, c, t):
+    if t == 0:
+        h.append(c)
+        pos = len(h)
+        if pos % 2 == 0:
+            parent = int(pos / 2)
+        else:
+            parent = int((pos - 1) / 2)
+        while pos > 1 and h[pos - 1] < h[parent - 1]:
+            h = swap(h, pos - 1, parent - 1)
+            pos = parent
+            if pos % 2 == 0:
+                parent = int(pos / 2)
+            else:
+                parent = int((pos - 1) / 2)
+    else:
+        h.append(c)
+        pos = len(h)
+        if pos % 2 == 0:
+            parent = int(pos / 2)
+        else:
+            parent = int((pos - 1) / 2)
+        while  pos > 1 and h[pos - 1] > h[parent - 1]:
+            h = swap(h, pos - 1, parent - 1)
+            pos = parent
+            if pos % 2 == 0:
+                parent = int(pos / 2)
+            else:
+                parent = int((pos - 1) / 2)
+    return (h)
+
+#extract the max/min element of a heap, t = 0 means the heap keeps min value, t = 1 means the heap keeps max value
+def heap_extract(h, t):
+    e = h[0]
+    if len(h) < 3:
+        h.pop(0)
+        return(h, e)
+    h[0] = h.pop()
+    length = len(h)
+    pos = 1
+    children = pos * 2
+    if t == 0:
+        if children < length and h[children - 1] > h[children]:
+            children += 1
+        while h[pos - 1] > h[children - 1]:
+            h = swap(h, pos - 1, children - 1)
+            pos = children
+            children = pos * 2
+            if children > length:
+                break
+            if children < length and h[children - 1] > h[children]:
+                children += 1
+    else:
+        if children < length and h[children - 1] < h[children]:
+            children += 1
+        while h[pos - 1] < h[children - 1]:
+            h = swap(h, pos - 1, children - 1)
+            pos = children
+            children = pos * 2
+            if children > length:
+                break
+            if children < length and h[children - 1] < h[children]:
+                children += 1
+    return(h, e)
+
+def median_maintain(data):
+    n = len(data)
+    m = []
+    num_small = 0
+    num_large = 0
+    heap_small = []
+    heap_large = []
+    heap_small.append(data[0])
+    m.append(data[0])
+    for i in range(1, n):
+        curr = data[i]
+        if i % 2 == 0:
+            if curr < heap_large[0]:
+                heap_small = heap_push(heap_small, curr, 1)
+            else:
+                (heap_large, temp) = heap_extract(heap_large, 0)
+                heap_small = heap_push(heap_small, temp, 1)
+                heap_large = heap_push(heap_large, curr, 0)
+        elif i % 2 == 1:
+            if curr > heap_small[0]:
+                heap_large = heap_push(heap_large, curr, 0)
+            else:
+                (heap_small, temp) = heap_extract(heap_small, 1)
+                heap_large = heap_push(heap_large, temp, 0)
+                heap_small = heap_push(heap_small, curr, 1)
+        #print(str(heap_small), '\n')
+        #for j in range(len(heap_small) // 2 - 1):
+        #    if heap_small[j] < heap_small[2 * (j + 1) - 1] or heap_small[j] < heap_small[2 * (j + 1)]:
+           #     print(str(heap_small), 'small', str(j), 'new is', str(curr))
+        #for j in range(len(heap_large) // 2 - 1):
+          #  if heap_large[j] > heap_large[2 * j + 1] or heap_large[j] > heap_large[2 * j + 2]:
+           #     print(str(heap_large), 'large', str(j))
+            
+        #if len(heap_small) - len(heap_large) < 0 or len(heap_small) - len(heap_large) > 1 or (len(heap_small) + len(heap_large)) != (i + 1):
+         #   print('error')
+         #   print(str(heap_large), 'large', str(heap_small), 'small')
+        m.append(heap_small[0])
+    return (m)
+                
+data = readin()
+m = median_maintain(data)
+mod = sum(m) % 10000
+print('The mod is ' + str(mod))
+
+    
+
