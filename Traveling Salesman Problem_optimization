@@ -1,0 +1,129 @@
+##Homework for Algorithm Design 2, week 5
+##Heuristics method for the Traveling Salesman Problem, with 2 opt optimization
+
+import math
+import time
+
+def readin():
+    data = open('G:\\UCHI\Algorithm design 2\week5\data.txt', 'r')
+    datalist = list(data)
+    temp = datalist.pop(0).split()
+    n = int(temp.pop())
+    x = []
+    y = []
+    for i in datalist:
+        temp = i.split()
+        tempy = float(temp.pop())
+        tempx = float(temp.pop())
+        x.append(tempx)
+        y.append(tempy)
+    return(n, x, y)
+
+def distance(x1, y1, x2, y2):
+    return(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
+
+def dmatrix(n, x, y):
+    d = [[] for i in range(n)]
+    for i in range(n):
+        if i %1000 == 0:
+                print(str(i))
+        for j in range(n):
+            d[i].append(distance(x[i], y[i], x[j], y[j]))
+    return(d)
+
+def initialize(n, dm):
+    edge = []
+    for i in range(n):
+        for j in range(i):
+            edge.append((dm[i][j], i , j))
+    edge.sort()
+    leader = [i for i in range(n)]
+    route = [[] for i in range(n)]
+    count = 0
+    while count < n - 1:
+        if count %1000 == 0:
+                print(str(i))
+        temp = edge.pop(0)
+        p1 = temp[1]
+        p2 = temp[2]
+        if len(route[p1]) < 2 and len(route[p2]) < 2:                                # cannot visit a city twice
+            if leader[p1] != leader[p2]:                                                                   # cannot form a cycle
+                count += 1
+                route[p1].append(p2)
+                route[p2].append(p1)
+                templ1 = leader[p1]
+                templ2 = leader[p2]
+                for i in range(len(leader)):
+                    if leader[i] == templ2:
+                        leader[i] = templ1
+    for i in route:
+        if len(i) == 1:
+            break
+    path = []
+    s = route.index(i)
+    e = i[0]
+    path.append(s)
+    path.append(e)
+    l = 2
+    while l <n:
+        temp = route[e]
+        for i in temp:
+            if i != s:
+                break
+        path.append(i)
+        s = e
+        e = i
+        l += 1
+    #print(str(route))
+    #print(str(path))
+    return(path)
+
+def swap(route, p1, p2):
+    i = p1 + 1
+    j = p2
+    while i < j:
+        temp = route[i]
+        route[i] = route[j]
+        route[j] = temp
+        i += 1
+        j -= 1
+    return(route)
+
+def length(n, route, dm):
+    l = 0
+    for i in range(n):
+        l = l + dm[route[i]][route[i + 1]]
+    return(l)
+
+def twoopt(n, route, dm):
+    route.append(route[0])
+    while True:
+        minchange = 0
+        for i in range(n - 2):
+            if i %1000 == 0:
+                print(str(i))
+            if i == 0:
+                indi = 1
+            else:
+                indi = 0
+            for j in range(i + 2, n - indi):
+                change = dm[route[i]][route[j]] +dm[route[i + 1]][route[j + 1]] - dm[route[i]][route[i + 1]] - dm[route[j]][route[j + 1]]
+                if minchange > change:
+                    minchange = change
+                    mini = i
+                    minj = j
+        if minchange < 0:
+            route = swap(route, mini, minj)
+        else:
+            break
+    return(route)
+
+start = time.clock()
+(n, x, y) = readin()
+dm = dmatrix(n, x, y)
+route = initialize(n, dm)
+route = twoopt(n, route, dm)
+print(str(length(n, route, dm)))
+end = time.clock()
+print(end-start)
+
