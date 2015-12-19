@@ -1,0 +1,118 @@
+##Homework for Algorithm Design 2, week 6
+##local search method to solve 2-SAT problem with size 100000 - 1000000
+
+import time
+import math
+import random
+
+def readin():
+    data = open('G:\\UCHI\Algorithm design 2\week6\data6.txt', 'r')
+    datalist = list(data)
+    temp = datalist.pop(0).split()
+    n = int(temp.pop())
+    clause = []
+    for i in datalist:
+        temp = i.split()
+        temp1 = int(temp.pop())
+        temp2 = int(temp.pop())
+        clause.append([temp2, temp1])
+    return(n, clause)
+
+def refine(clause, num):
+    d = []
+    for i in range(len(clause)):
+        temp = clause[i]
+        if temp[0] in num or temp[1] in num:
+            d.append(i)
+    
+    return(clause)
+
+def optimization(n, clause):
+    posi = [[] for i in range(n)]
+    nega = [[] for i in range(n)]
+    for i in range(len(clause)):
+        temp = clause[i]
+        if temp[0] < 0:
+            nega[- temp[0] - 1].append(i)
+        else:
+            posi[temp[0] - 1].append(i)
+        if temp[1] < 0:
+            nega[- temp[1] - 1].append(i)
+        else:
+            posi[temp[1] - 1].append(i)
+    while True:
+        d = []
+        for i in range(n):
+            if posi[i] != [] and nega[i] == []:
+                d.extend(posi[i])
+            elif posi[i] == [] and nega[i] != []:
+                d.extend(nega[i])
+        if d ==[]:
+            break
+        d = list(set(d))
+        d.sort()
+        while d != []:
+            temp = d.pop()
+            tempp = clause[temp]
+            clause[temp] = []
+            if tempp[0] < 0:
+                nega[- tempp[0] - 1].remove(temp)
+            else:
+                posi[tempp[0] - 1].remove(temp)
+            if tempp[1] < 0:
+                nega[- tempp[1] - 1].remove(temp)
+            else:
+                posi[tempp[1] - 1].remove(temp)
+    new = []
+    for i in clause:
+        if i != []:
+            new.append(i)
+    print(str(len(new)))
+    return(new)
+
+def check(clause, literal, assignment):
+    s = [0 for i in range(len(clause))]
+    for i in range(len(clause)):
+        temp = clause[i]
+        b0 = assignment[literal.index(abs(temp[0]))] - 0.5
+        b1 = assignment[literal.index(abs(temp[1]))] - 0.5
+        if b0 * temp[0] > 0 or b1 * temp[1] > 0:
+            s[i] = 1
+    return(s)
+
+def unique_index(L,e):
+    return [i for i,j in enumerate(L) if j == e]
+
+def papadimitrion(clause):
+    n = 0
+    literal = []
+    for i in clause:
+        if abs(i[0]) not in literal:
+            literal.append(abs(i[0]))
+            n += 1
+        if [abs(i[1])] not in literal:
+            literal.append(abs(i[1]))
+            n += 1
+    for i in range(10):
+        print(str(i))
+        assignment = [random.randrange(2) for j in range(n)]
+        for j in range(2 * n ** 2):
+            satisfy = check(clause, literal, assignment)
+            if 0 not in satisfy:
+                return((literal, assignment))
+            r = random.randrange(len(satisfy) - sum(satisfy))
+            u = unique_index(satisfy, 0)
+            curr = clause[u[r]]
+            r = random.randrange(2)
+            curr = curr[r]
+            assignment[literal.index(abs(curr))] = 1 - assignment[literal.index(abs(curr))]
+    print('unsatisfiable')
+    return('unsatisfiable')
+
+start = time.clock()
+(n, clause) = readin()
+clause = optimization(n, clause)
+solution = papadimitrion(clause)
+end = time.clock()
+print(end-start)
+
