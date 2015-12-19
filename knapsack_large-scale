@@ -1,0 +1,77 @@
+#Homework for Algorithm Design 2, week 3,
+#dynamic programing, knapsack problem, large - scale data
+
+import copy
+
+def readin():
+    data = open('G:\\UCHI\Algorithm design 2\week3\Q2.txt', 'r')
+    datalist = list(data)
+    weight = []
+    value = []
+    temp = datalist.pop(0)
+    temp = temp.split()
+    n = int(temp.pop())
+    capacity = int(temp.pop())
+    for i in range(n):
+        temp = datalist[i]
+        temp = temp.split()
+        weight.append(int(temp.pop()))
+        value.append(int(temp.pop()))
+    return(n, capacity, weight, value)
+
+def mainloop(A, P, n, capacity, weight, value):
+    for i in range(1, n + 1):
+        curr_v = value[i - 1]
+        curr_w = weight[i - 1]
+        #(position, value before this position(including), value after this position)
+        h1 = [[0, 0, A[0]]]
+        h2 = [[curr_w - 1, 0, A[0] + curr_v]]
+        l = len(P)
+        for j in range(l):
+            if j < l - 1:
+                h1.append([P[j], A[j], A[j + 1]])
+            else:
+                h1.append([P[j], A[j], float('inf')])
+        for j in range(l):
+            if curr_w + P[j] >= capacity:
+                h2.append([capacity, A[j] + curr_v, float('inf')])
+                break
+            else:
+                h2.append([curr_w + P[j], A[j] + curr_v, A[j + 1] + curr_v])
+        #print(str(h1))
+        #print(str(h2))
+        h1.extend(h2)
+        h1.sort()
+        #merge repeated items
+        delete = []
+        for k in range(len(h1) - 1):
+            if h1[k][0] == h1[k + 1][0]:
+                h1[k][1] = max(h1[k][1], h1[k + 1][1])
+                h1[k][2] = max(h1[k][2], h1[k + 1][2])
+                delete.append(k + 1)
+        while delete != []:
+            temp = delete.pop()
+            h1.pop(temp)
+        #print(str(h1))
+        A = []
+        P = []
+        for k in range(len(h1) - 1):
+            if h1[k][1] < h1[k][2]:
+                A.append(h1[k][1])
+                P.append(h1[k][0])
+            else:
+                h1[k][2] = h1[k][1]
+            if h1[k][2] > h1[k + 1][1]:
+                h1[k + 1][1] = h1[k][2]
+        A.append(h1[-1][1])
+        P.append(h1[-1][0])
+        #print(str(A))
+        #print(str(P) + '\n')
+    return(A)
+                            
+(n, capacity, weight, value) = readin()
+A = [0]
+P = [capacity]
+A = mainloop(A, P, n, capacity, weight, value)
+print(str(max(A)))
+
