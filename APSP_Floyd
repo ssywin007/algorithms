@@ -1,0 +1,34 @@
+#Homework for Algorithm Design 2, week 3,
+#all pairs shortest paths, Floyd Warshall algorithm
+
+def readin3():
+    data = open('G:\\UCHI\Algorithm design 2\week4\g3.txt', 'r')
+    datalist = list(data)
+    temp = datalist.pop(0).split()
+    e = int(temp.pop())
+    v = int(temp.pop())
+    m = [[float('inf') for j in range(v)] for i in range(v)]
+    for i in range(v):
+        m[i][i] = 0
+    for i in range(e):
+        temp = datalist[i].split()
+        tempc = int(temp.pop())
+        tempend = int(temp.pop())
+        tempstart = int(temp.pop())
+        m[tempend - 1][tempstart - 1] = tempc
+    return(v, m)
+
+def floyd(v, m):
+    for k in range(v):
+        print(str(k))
+        for i in range(v):
+            for j in range(v):
+                m[i][j] = min(m[i][j], m[i][k] + m[k][j])
+    return(m)
+
+(v, m) = readin3()
+m = floyd(v, m)
+minimum = float('inf')
+for i in range(v):
+    minimum = min(minimum, min(m[i]))
+
