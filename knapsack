@@ -1,0 +1,45 @@
+#Homework for Algorithm Design 2, week 3,
+#dynamic programing, knapsack problem
+
+import copy
+
+def readin():
+    data = open('G:\\UCHI\Algorithm design 2\week3\Q1.txt', 'r')
+    datalist = list(data)
+    weight = []
+    value = []
+    temp = datalist.pop(0)
+    temp = temp.split()
+    n = int(temp.pop())
+    capacity = int(temp.pop())
+    for i in range(n):
+        temp = datalist[i]
+        temp = temp.split()
+        weight.append(int(temp.pop()))
+        value.append(int(temp.pop()))
+    return(n, capacity, weight, value)
+
+def initialize(n, capacity):
+    A = []
+    for i in range(n + 1):
+        A.append([0 for i in range(capacity + 1)])
+    return(A)
+
+def mainloop(A, n, capacity, weight, value):
+    for i in range(1, n + 1):
+        curr_v = value[i - 1]
+        curr_w = weight[i - 1]
+        for x in range(capacity + 1):
+            if x < curr_w:
+                A[i][x] = A[i - 1][x]
+            else:
+                A[i][x] = max(A[i - 1][x], A[i - 1][x - curr_w] + curr_v)
+    return(A)
+                            
+(n, capacity, weight, value) = readin()
+A = initialize(n, capacity)
+A = mainloop(A, n, capacity, weight, value)
+print(str(max(A[n])))
+
+
+    
